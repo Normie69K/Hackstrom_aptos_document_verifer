@@ -54,19 +54,13 @@ AptosProof/
 ## Screenshots
 
 **1. Dashboard**
-![Dashboard](./screenshots/dashboard.png)
+![Dashboard](./screenshots/dashboard.jpg)
 
 **2. Store Document Hash**
-![Store Hash](./screenshots/store-hash.png)
+![Store Hash](./screenshots/store-hash.jpg)
 
-**3. Verify Document**
+**3. Verify Document & Transaction Confirmation**
 ![Verify](./screenshots/verify.png)
-
-**4. Transaction Confirmation**
-![Transaction Confirmation](./screenshots/confirmation.png)
-
-**5. Petra Wallet Integration**
-![Petra Wallet](./screenshots/petra-wallet.png)
 
 ---
 
