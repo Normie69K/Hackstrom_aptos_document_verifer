@@ -1,0 +1,11 @@
+[package]
+name = "AptosProof"
+version = "1.0.0"
+
+[addresses]
+AptosProof = "0x2a7aca832d1295811fed4099ee439045a6a1541b17265a49388a5f9d7c3961df"
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"

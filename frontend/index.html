@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Secure document verification on Aptos blockchain using cryptographic hashing">
+  <title>AptosProof — Blockchain Document Verification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/aptos@latest/dist/index.global.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2a1f3a 100%);
+      color: #fff;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+      animation: fadeInDown 0.8s ease;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    h1 {
+      font-size: 4em;
+      font-weight: 900;
+      background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 50%, #06b6d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+      text-shadow: 0 0 40px rgba(139, 92, 246, 0.3);
+      letter-spacing: -2px;
+    }
+
+    header > p {
+      font-size: 1.3em;
+      color: #a5b4fc;
+      margin-bottom: 30px;
+      font-weight: 500;
+    }
+
+    .features {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .feature-badge {
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 0.95em;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      cursor: default;
+    }
+
+    .feature-badge:hover {
+      background: rgba(139, 92, 246, 0.25);
+      border-color: rgba(139, 92, 246, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
+    }
+
+    .wallet-section {
+      margin-top: 40px;
+      animation: fadeInUp 0.8s ease 0.2s both;
+    }
+
+    button {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      color: white;
+      border: none;
+      padding: 16px 40px;
+      font-size: 1.1em;
+      font-weight: 700;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+      position: relative;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(139, 92, 246, 0.5);
+    }
+
+    button:active {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    button:disabled:hover {
+      transform: none;
+    }
+
+    #walletAddress {
+      margin-top: 20px;
+      padding: 16px 28px;
+      background: rgba(34, 197, 94, 0.15);
+      border: 2px solid rgba(34, 197, 94, 0.3);
+      border-radius: 12px;
+      display: inline-block;
+      font-family: 'Courier New', monospace;
+      font-size: 1em;
+      font-weight: 600;
+      color: #4ade80;
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .sections-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+
+    section {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      transition: all 0.4s ease;
+      animation: fadeInUp 0.8s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #8b5cf6, #3b82f6, #06b6d4);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    section:hover::before {
+      opacity: 1;
+    }
+
+    section:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 70px rgba(139, 92, 246, 0.2);
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+
+    .upload-section {
+      animation-delay: 0.2s;
+    }
+
+    .verify-section {
+      animation-delay: 0.4s;
+    }
+
+    h2 {
+      font-size: 2em;
+      margin-bottom: 30px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      margin-bottom: 25px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px dashed rgba(139, 92, 246, 0.4);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .file-input-wrapper:hover {
+      background: rgba(139, 92, 246, 0.1);
+      border-color: rgba(139, 92, 246, 0.6);
+    }
+
+    .file-input-wrapper::before {
+      content: '📁 Drop file here or click to browse';
+      display: block;
+      font-size: 1.1em;
+      color: #a5b4fc;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .file-input-wrapper::after {
+      content: 'All file types supported';
+      display: block;
+      font-size: 0.9em;
+      color: #6b7280;
+      margin-top: 10px;
+    }
+
+    input[type="file"] {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-info {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+      color: #60a5fa;
+      animation: fadeInUp 0.4s ease;
+    }
+
+    .status-message {
+      margin: 20px 0;
+      padding: 16px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      word-break: break-all;
+      animation: fadeInUp 0.4s ease;
+      line-height: 1.6;
+    }
+
+    .status-message:empty {
+      display: none;
+    }
+
+    #hashDisplay:not(:empty) {
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #c4b5fd;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+
+    #txnStatus:not(:empty) {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+    }
+
+    #verifyStatus:not(:empty) {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+    }
+
+    section button {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      animation: fadeInUp 0.8s ease 0.6s both;
+    }
+
+    footer strong {
+      font-size: 1.2em;
+      background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 800;
+    }
+
+    .divider {
+      width: 100px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+      margin: 20px auto;
+    }
+
+    footer p {
+      color: #a5b4fc;
+      margin: 10px 0;
+      font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.5em;
+      }
+
+      .sections-grid {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 30px 20px;
+      }
+
+      button {
+        padding: 14px 30px;
+        font-size: 1em;
+      }
+    }
+
+    .loading {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .success-animation {
+      animation: successPulse 0.6s ease;
+    }
+
+    @keyframes successPulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .error {
+      background: rgba(239, 68, 68, 0.15) !important;
+      border-color: rgba(239, 68, 68, 0.3) !important;
+      color: #fca5a5 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AptosProof</h1>
+      <p>Secure Document Verification on Aptos Blockchain</p>
+      <div class="features">
+        <span class="feature-badge">🚀 Immutable</span>
+        <span class="feature-badge">⚡ Instant</span>
+        <span class="feature-badge">🔒 Secure</span>
+        <span class="feature-badge">🌐 Decentralized</span>
+      </div>
+      <div class="wallet-section">
+        <button id="connectBtn">Connect Petra Wallet</button>
+        <p id="walletAddress"></p>
+      </div>
+    </header>
+
+    <main>
+      <div class="sections-grid">
+        <section class="upload-section">
+          <h2>📤 Store Document Hash</h2>
+          <div class="file-input-wrapper">
+            <input type="file" id="uploadFile" accept="*/*" />
+          </div>
+          <div id="uploadFileInfo" class="file-info" style="display: none;"></div>
+          <button id="generateHashBtn">🔑 Generate Hash</button>
+          <p id="hashDisplay" class="status-message"></p>
+          <button id="saveToAptosBtn" disabled>💾 Save to Blockchain</button>
+          <p id="txnStatus" class="status-message"></p>
+        </section>
+
+        <section class="verify-section">
+          <h2>✅ Verify Document</h2>
+          <div class="file-input-wrapper">
+            <input type="file" id="verifyFile" accept="*/*" />
+          </div>
+          <div id="verifyFileInfo" class="file-info" style="display: none;"></div>
+          <button id="verifyHashBtn">🔍 Verify on Blockchain</button>
+          <p id="verifyStatus" class="status-message"></p>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <p><strong>Powered by Aptos Blockchain</strong></p>
+      <div class="divider"></div>
+      <p>SHA-256 Cryptographic Hashing • Immutable Storage • Instant Verification</p>
+      <!-- <p style="margin-top: 20px; font-size: 0.9em; opacity: 0.8;">
+        Built with ❤️ for hackathon excellence 🏆
+      </p> -->
+    </footer>
+  </div>
+
+  <script src="utils/hashUtils.js"></script>
+  <script src="utils/aptosClient.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
