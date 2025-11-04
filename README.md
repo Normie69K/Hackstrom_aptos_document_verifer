@@ -69,7 +69,7 @@ AptosProof/
 
 # Contract Address
 
-0x2a7aca832d1295811fed4099ee439045a6a1541b17265a49388a5f9d7c3961df
+0x1b4f9f57c1525220fe12d508291a670f4aa9330aa650dfa37d9e7c065a2006fb
 
 ![Transaction](./screenshots/transaction.png)
 

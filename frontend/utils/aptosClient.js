@@ -1,5 +1,5 @@
 const NODE_URL = "https://fullnode.devnet.aptoslabs.com/v1";
-const MODULE_ADDRESS = "0x2a7aca832d1295811fed4099ee439045a6a1541b17265a49388a5f9d7c3961df";
+const MODULE_ADDRESS = "0x1b4f9f57c1525220fe12d508291a670f4aa9330aa650dfa37d9e7c065a2006fb";
 
 console.log("aptosClient.js loaded");
 console.log("NODE_URL:", NODE_URL);
@@ -40,7 +40,7 @@ async function uploadHashToAptos(fileHash) {
       type: "entry_function_payload",
       function: `${MODULE_ADDRESS}::DocumentStore::add_hash`,
       type_arguments: [],
-      arguments: [Array.from(hashBytes)],
+      arguments: [Array.from(hashBytes)], // Only argument is the hash
     };
     
     console.log("Submitting transaction...", payload);
@@ -51,6 +51,8 @@ async function uploadHashToAptos(fileHash) {
     console.error("Transaction error:", err);
     if (err.message.includes("User rejected")) {
       alert("Transaction was rejected. Please approve the transaction in Petra Wallet.");
+    } else if (err.message.includes("EHASH_ALREADY_EXISTS")) {
+      alert("This document hash has already been stored on the blockchain.");
     } else {
       alert("Transaction failed: " + err.message);
     }
@@ -58,10 +60,9 @@ async function uploadHashToAptos(fileHash) {
   }
 }
 
-async function verifyHashOnAptos(fileHash, ownerAddress) {
+async function verifyHashOnAptos(fileHash) {
   try {
     console.log("=== VERIFICATION START ===");
-    console.log("Owner address:", ownerAddress);
     console.log("File hash (hex):", fileHash);
     
     // The view function expects hex string with 0x prefix
@@ -72,7 +73,7 @@ async function verifyHashOnAptos(fileHash, ownerAddress) {
     const payload = {
       function: `${MODULE_ADDRESS}::DocumentStore::verify_hash`,
       type_arguments: [],
-      arguments: [ownerAddress, hexString],
+      arguments: [hexString], // Only argument is the hash, no ownerAddress
     };
     
     console.log("Payload to send:", JSON.stringify(payload, null, 2));
@@ -95,7 +96,12 @@ async function verifyHashOnAptos(fileHash, ownerAddress) {
       return false;
     }
     
+    // The contract now returns [bool, address]
     const result = data[0] === true;
+    if (result) {
+        console.log("✅ VERIFIED: Hash was uploaded by:", data[1]);
+    }
+    
     console.log("Verification result:", result);
     console.log("=== VERIFICATION END ===");
     

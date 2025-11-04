@@ -159,7 +159,11 @@ verifyHashBtn.addEventListener("click", async () => {
   try {
     const hash = await generateFileHash(file);
     console.log("Hash to verify:", hash);
-    const found = await verifyHashOnAptos(hash, connectedWallet);
+    
+    // --- THIS LINE IS FIXED ---
+    // No longer pass connectedWallet, as the new contract is global
+    const found = await verifyHashOnAptos(hash); 
+    
     console.log("Verification result:", found);
     if (found) {
       verifyStatus.innerHTML = '<span class="checkmark"></span> <strong>✅ Document Verified!</strong><br>This document exists on the Aptos blockchain';
