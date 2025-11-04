@@ -67,9 +67,9 @@ AptosProof/
 
 ---
 
-# Contact Address
+# Contract Address
 
-0xea365a84a0ab9824484073536f5ed85b3bf6aaa2f7a5c0b15856b7ae9c6c4841
+0x2a7aca832d1295811fed4099ee439045a6a1541b17265a49388a5f9d7c3961df
 
 ---
 
