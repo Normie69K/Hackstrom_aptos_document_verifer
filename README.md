@@ -71,7 +71,7 @@ AptosProof/
 
 0x2a7aca832d1295811fed4099ee439045a6a1541b17265a49388a5f9d7c3961df
 
-![Transaction](./screenshots/transaction)
+![Transaction](./screenshots/transaction.png)
 
 ---
 
