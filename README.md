@@ -66,12 +66,20 @@ AptosProof/
 ![Verify](./screenshots/verify.jpg)
 
 ---
+# Deployment
+
+You can view the live application here:
+
+[https://web3sgnr.netlify.app/](https://web3sgnr.netlify.app/)
+
 
 # Contract Address
 
 0x1b4f9f57c1525220fe12d508291a670f4aa9330aa650dfa37d9e7c065a2006fb
 
 ![Transaction](./screenshots/transaction.png)
+
+![Transaction1](./screenshots/transaction1.png)
 
 ---
 
